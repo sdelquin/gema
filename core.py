@@ -12,6 +12,7 @@ import settings
 class Email:
     def __init__(self, id: int, payload: str):
         self.id = id
+        self.inbox = self.from_ = self.subject = self.date = None
         if m := re.search(r'^New message received at *(.*)\.', payload, re.MULTILINE):
             self.inbox = Email.decode_content(m[1])
         if m := re.search(r'^Sender: *(.*)', payload, re.MULTILINE):
@@ -76,12 +77,15 @@ class Email2Tg:
 
     def dispatch(self):
         for user_cfg in self.config['users']:
-            server = Pop3Server(user_cfg['pop3'], user_cfg['username'], user_cfg['password'])
+            server = Pop3Server(
+                user_cfg['pop3']['addr'], user_cfg['pop3']['username'], user_cfg['pop3']['password']
+            )
             for email in server.fetch():
-                try:
-                    print(email)
-                    self.tgbot.send(user_cfg['telegram_id'], email.as_markdown())
-                except Exception as err:
-                    raise err
-                else:
-                    server.delete(email)
+                if (inbox := user_cfg.get('inbox')) is None or email.inbox == inbox:
+                    try:
+                        print(email)
+                        self.tgbot.send(user_cfg['telegram_id'], email.as_markdown())
+                    except Exception as err:
+                        raise err
+                    else:
+                        server.delete(email)

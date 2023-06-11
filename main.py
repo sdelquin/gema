@@ -1,4 +1,4 @@
-from core import Email2Tg
+from core import GobCanEmailAlarm
 
-email2tg = Email2Tg()
-email2tg.dispatch()
+gema = GobCanEmailAlarm()
+gema.dispatch()

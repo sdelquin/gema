@@ -70,7 +70,7 @@ class TelegramBot:
         self.bot.send_message(chat_id=chat_id, text=text, parse_mode=telegram.ParseMode.MARKDOWN)
 
 
-class Email2Tg:
+class GobCanEmailAlarm:
     def __init__(self, config_path: str = settings.CONFIG_PATH):
         self.config = yaml.load(open(config_path), Loader=yaml.FullLoader)
         self.tgbot = TelegramBot()

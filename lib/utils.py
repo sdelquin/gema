@@ -1,7 +1,9 @@
 import email.header
 import re
+from datetime import datetime
 
 import logzero
+import pytz
 
 import settings
 
@@ -44,3 +46,8 @@ def pluralize(text: str, n: int) -> str:
     if n == 1:
         return text
     return text + 's'
+
+
+def parse_date(date: str, to_tz=settings.TIMEZONE) -> datetime:
+    d = datetime.strptime(date, '%a, %d %b %Y %H:%M:%S %z')
+    return d.astimezone(pytz.timezone(to_tz))

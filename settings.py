@@ -16,3 +16,5 @@ POP3_PASSWORD = config('POP3_PASSWORD')
 LOGFILE = config('LOGFILE', default=PROJECT_DIR / (PROJECT_NAME + '.log'), cast=Path)
 LOGFILE_SIZE = config('LOGFILE_SIZE', cast=float, default=1e6)
 LOGFILE_BACKUP_COUNT = config('LOGFILE_BACKUP_COUNT', cast=int, default=3)
+
+TIMEZONE = config('TIMEZONE', default='Atlantic/Canary')

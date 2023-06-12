@@ -7,7 +7,7 @@ from logzero import logger
 
 import settings
 
-from .utils import decode_content, pluralize
+from .utils import decode_content, parse_date, pluralize
 
 
 class Email:
@@ -36,8 +36,8 @@ class Email:
         else:
             self.subject = None
             logger.warning('Subject could not be parsed')
-        if m := re.search(r'^Date: *(.*)', content, re.MULTILINE):
-            self.date = decode_content(m[1])
+        if m := re.search(r'^Date: *(.*\+\d+)', content, re.MULTILINE):
+            self.date = parse_date(m[1])
         else:
             self.date = None
             logger.warning('Date could not be parsed')
@@ -52,7 +52,7 @@ class Email:
     def as_markdown(self) -> str:
         return f'''*From*: {self.from_}
 *Subject*: {self.subject}
-*Date*: {self.date}
+*Date*: {self.date.strftime('%c')}
 *Inbox*: {self.inbox}'''
 
 

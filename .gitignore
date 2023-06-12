@@ -1,6 +1,5 @@
 *.pyc
 .python-version
-config.yaml
 .env
 *.log
 .artwork

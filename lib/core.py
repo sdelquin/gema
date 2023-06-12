@@ -3,7 +3,6 @@ import re
 from typing import Iterator
 
 import telegram
-import yaml
 from logzero import logger
 
 import settings
@@ -58,7 +57,12 @@ class Email:
 
 
 class Pop3Server:
-    def __init__(self, server_addr: str, username: str, password: str):
+    def __init__(
+        self,
+        server_addr: str = settings.POP3_SERVER,
+        username: str = settings.POP3_USERNAME,
+        password: str = settings.POP3_PASSWORD,
+    ):
         logger.debug(f'Building pop3 server at {server_addr}')
         self.server = poplib.POP3(server_addr)
         self.server.user(username)
@@ -76,7 +80,7 @@ class Pop3Server:
             yield email
 
     def delete(self, email: Email) -> None:
-        logger.debug(f'✗ Deleting email #{email.id}')
+        logger.debug(f'✗ Deleting email #{email.id} from pop3 server')
         self.server.dele(email.id)
 
     def __del__(self):
@@ -95,11 +99,8 @@ class TelegramBot:
 
 
 class GobCanEmailAlarm:
-    def __init__(
-        self, config_path: str = settings.CONFIG_PATH, notify: bool = True, delete: bool = True
-    ):
-        logger.info(f'Loading config from {config_path}')
-        self.config = yaml.load(open(config_path), Loader=yaml.FullLoader)
+    def __init__(self, notify: bool = True, delete: bool = True):
+        self.server = Pop3Server()
         self.tgbot = TelegramBot()
         self.notify = notify
         self.delete = delete
@@ -109,22 +110,18 @@ class GobCanEmailAlarm:
         if not self.delete:
             logger.warning('Disabled email deletion after dispatching')
 
-    def dispatch(self):
-        for user_cfg in self.config['users']:
-            logger.info(f'👤 Dispatching user {user_cfg["name"]}')
-            server = Pop3Server(
-                user_cfg['pop3']['addr'], user_cfg['pop3']['username'], user_cfg['pop3']['password']
-            )
-            for email in server.fetch():
-                if (inbox := user_cfg.get('inbox')) is None or email.inbox == inbox:
-                    try:
-                        logger.info(email)
-                        if self.notify:
-                            self.tgbot.send(user_cfg['telegram_id'], email.as_markdown())
-                    except Exception as err:
-                        logger.error(err)
-                    else:
-                        if self.delete:
-                            server.delete(email)
+    def dispatch(self, inbox: str = settings.INBOX, telegram_chat_id=settings.TELEGRAM_CHAT_ID):
+        logger.info(f'👤 Dispatching inbox {inbox}')
+        for email in self.server.fetch():
+            if inbox is None or email.inbox == inbox:
+                try:
+                    logger.info(email)
+                    if self.notify:
+                        self.tgbot.send(telegram_chat_id, email.as_markdown())
+                except Exception as err:
+                    logger.error(err)
                 else:
-                    logger.warning('Email inbox is not set in config file')
+                    if self.delete:
+                        self.server.delete(email)
+            else:
+                logger.warning(f'Email inbox "{inbox}" is not set in settings')

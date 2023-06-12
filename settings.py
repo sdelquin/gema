@@ -5,8 +5,13 @@ from prettyconf import config
 PROJECT_DIR = Path(__file__).parent
 PROJECT_NAME = PROJECT_DIR.name
 
-CONFIG_PATH = config('CONFIG_PATH', default='config.yaml')
-TELEGRAM_BOT_TOKEN = config('TELEGRAM_BOT_TOKEN', default='<YOUR_TELEGRAM_BOT_TOKEN_HERE>')
+TELEGRAM_BOT_TOKEN = config('TELEGRAM_BOT_TOKEN')
+TELEGRAM_CHAT_ID = config('TELEGRAM_CHAT_ID')
+
+INBOX = config('INBOX', default=None)
+POP3_SERVER = config('POP3_SERVER')
+POP3_USERNAME = config('POP3_USERNAME')
+POP3_PASSWORD = config('POP3_PASSWORD')
 
 LOGFILE = config('LOGFILE', default=PROJECT_DIR / (PROJECT_NAME + '.log'), cast=Path)
 LOGFILE_SIZE = config('LOGFILE_SIZE', cast=float, default=1e6)

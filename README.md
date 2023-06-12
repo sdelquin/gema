@@ -11,19 +11,13 @@ gema stands for **GobCan Email Alarm**
 1. Create a Python virtualenv (>=3.10)
 2. `pip install -r requirements.txt`
 3. Add custom values in `.env` file for the following params:
-   - `TELEGRAM_BOT_TOKEN`
-4. Add users' config in `config.yaml`:
 
-```yaml
-users:
-  - name: Sergio Delgado Quintero
-    inbox: hello@gobiernodecanarias.org
-    pop3:
-      username: user@example.com
-      password: thepassword
-      addr: pop3.example.com
-    telegram_id: your_telegram_id
-```
+- `TELEGRAM_BOT_TOKEN`
+- `TELEGRAM_CHAT_ID`
+- `INBOX`
+- `POP3_SERVER`
+- `POP3_USERNAME`
+- `POP3_PASSWORD`
 
 ## Usage
 

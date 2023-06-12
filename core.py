@@ -64,7 +64,7 @@ class Pop3Server:
         self.server.pass_(password)
 
     def fetch(self) -> Iterator[Email]:
-        logger.debug('Fetching new emails')
+        logger.info('👀 Fetching new emails')
         num_emails = len(self.server.list()[1])
         flag = '✨' if num_emails > 0 else '👎'
         logger.debug(f'{flag} {num_emails} new {pluralize("email", num_emails)}')
@@ -94,10 +94,19 @@ class TelegramBot:
 
 
 class GobCanEmailAlarm:
-    def __init__(self, config_path: str = settings.CONFIG_PATH):
+    def __init__(
+        self, config_path: str = settings.CONFIG_PATH, notify: bool = True, delete: bool = True
+    ):
         logger.info(f'Loading config from {config_path}')
         self.config = yaml.load(open(config_path), Loader=yaml.FullLoader)
         self.tgbot = TelegramBot()
+        self.notify = notify
+        self.delete = delete
+
+        if not self.notify:
+            logger.warning('Disabled email notification')
+        if not self.delete:
+            logger.warning('Disabled email deletion after dispatching')
 
     def dispatch(self):
         for user_cfg in self.config['users']:
@@ -109,10 +118,12 @@ class GobCanEmailAlarm:
                 if (inbox := user_cfg.get('inbox')) is None or email.inbox == inbox:
                     try:
                         logger.info(email)
-                        self.tgbot.send(user_cfg['telegram_id'], email.as_markdown())
+                        if self.notify:
+                            self.tgbot.send(user_cfg['telegram_id'], email.as_markdown())
                     except Exception as err:
                         logger.error(err)
                     else:
-                        server.delete(email)
+                        if self.delete:
+                            server.delete(email)
                 else:
                     logger.warning('Email inbox is not set in config file')

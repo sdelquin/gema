@@ -1,8 +1,8 @@
 import logzero
 import typer
 
-from core import GobCanEmailAlarm
-from utils import init_logger
+from lib.core import GobCanEmailAlarm
+from lib.utils import init_logger
 
 logger = init_logger()
 app = typer.Typer(add_completion=False)

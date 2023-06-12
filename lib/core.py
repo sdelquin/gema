@@ -7,7 +7,8 @@ import yaml
 from logzero import logger
 
 import settings
-from utils import decode_content, pluralize
+
+from .utils import decode_content, pluralize
 
 
 class Email:

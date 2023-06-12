@@ -27,7 +27,7 @@ class Email:
             logger.warning('Inbox could not be parsed')
         if m := re.search(r'^Sender: *(.*) <(.*)>', content, re.MULTILINE):
             self.from_name = decode_content(m[1])
-            self.from_email = decode_content(m[2])
+            self.from_email = m[2]
         else:
             self.from_name = None
             self.from_email = None
@@ -51,10 +51,10 @@ class Email:
         return f'📥 {self.subject} ({self.from_email})'
 
     def as_markdown(self) -> str:
-        return f'''*Inbox*: {self.inbox}
+        return f'''*From*: {self.from_}
+*Subject*: {self.subject}
 *Date*: {self.date}
-*From*: {self.from_}
-*Subject*: {self.subject}'''
+*Inbox*: {self.inbox}'''
 
 
 class Pop3Server:

@@ -1,5 +1,7 @@
 # gema
 
+![Logo Gema](./logo-gema.svg)
+
 gema stands for **GobCan Email Alarm**
 
 > This tool lets you receive Telegram notification when you receive an incoming email to Gobierno de Canarias.

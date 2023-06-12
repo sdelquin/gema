@@ -1,5 +1,4 @@
 import email.header
-import re
 from datetime import datetime
 
 import logzero
@@ -9,7 +8,7 @@ import settings
 
 
 def init_logger():
-    console_logformat = (
+    logformat = (
         '%(asctime)s '
         '%(color)s'
         '[%(levelname)-8s] '
@@ -19,11 +18,9 @@ def init_logger():
         '(%(filename)s:%(lineno)d)'
         '%(end_color)s'
     )
-    # remove colors on logfile
-    file_logformat = re.sub(r'%\((end_)?color\)s', '', console_logformat)
 
-    console_formatter = logzero.LogFormatter(fmt=console_logformat)
-    file_formatter = logzero.LogFormatter(fmt=file_logformat)
+    console_formatter = logzero.LogFormatter(fmt=logformat)
+    file_formatter = logzero.LogFormatter(fmt=logformat, color=False)
     logzero.setup_default_logger(formatter=console_formatter)
     logzero.logfile(
         settings.LOGFILE,

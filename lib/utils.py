@@ -1,4 +1,5 @@
 import email.header
+import re
 from datetime import datetime
 
 import logzero
@@ -34,7 +35,9 @@ def init_logger():
 def decode_content(content: str) -> str:
     CHEADER = '=?UTF-8?Q?'
     CFOOTER = '?='
-    payload = f'{CHEADER}{content}{CFOOTER}'
+    cleaned_content = re.sub('\n', '', content)
+    cleaned_content = re.sub(r'={2,}', '=', cleaned_content)
+    payload = f'{CHEADER}{cleaned_content}{CFOOTER}'
     text, encoding = email.header.decode_header(payload)[0]
     return text.decode(encoding)
 

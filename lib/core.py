@@ -1,5 +1,6 @@
 import poplib
 import re
+from email import message_from_bytes
 from typing import Iterator
 
 import telegram
@@ -11,33 +12,35 @@ from .utils import decode_content, parse_date, pluralize
 
 
 class Email:
-    def __init__(self, id: int, payload: list[bytes]):
+    def __init__(self, id: int, contents: list[bytes]):
         logger.debug(f'Building email with id #{id}')
         self.id = id
-        self.parse_payload(payload)
+        self.parse_contents(contents)
 
-    def parse_payload(self, payload: list[bytes]) -> None:
+    def parse_contents(self, contents: list[bytes]) -> None:
         logger.debug('Parsing payload')
-        content = '\n'.join(c.decode('utf-8') for c in payload[::-1])
-        if m := re.search(r'^New message received at *(.*)\.', content, re.MULTILINE):
+        message = message_from_bytes(b'\n'.join(contents))
+        payload = message.get_payload()
+        logger.debug(payload)
+        if m := re.search(r'^New message received at *(.*)\.', payload):
             self.inbox = decode_content(m[1])
         else:
             self.inbox = None
             logger.warning('Inbox could not be parsed')
-        if m := re.search(r'^Sender: *(.*) <(.*)>', content, re.MULTILINE):
+        if m := re.search(r'Sender: *(.*) <(.*)>', payload):
             self.from_name = decode_content(m[1])
             self.from_email = m[2]
         else:
             self.from_name = None
             self.from_email = None
             logger.warning('From could not be parsed')
-        if m := re.search(r'^Subject: *(.*)', content, re.MULTILINE):
+        if m := re.search(r'Subject: *(.*)', payload, re.DOTALL | re.MULTILINE):
             self.subject = decode_content(m[1])
         else:
             self.subject = None
             logger.warning('Subject could not be parsed')
-        if m := re.search(r'^Date: *(.*\+\d+)', content, re.MULTILINE):
-            self.date = parse_date(m[1])
+        if m := re.search(r'.*\+\d+', message['Date']):
+            self.date = parse_date(m[0])
         else:
             self.date = None
             logger.warning('Date could not be parsed')
@@ -75,8 +78,8 @@ class Pop3Server:
         logger.debug(f'{flag} {num_emails} new {pluralize("email", num_emails)}')
         for email_id in range(1, num_emails + 1):
             logger.debug(f'Retrieving content #{email_id} from server')
-            payload = self.server.retr(email_id)[1]
-            email = Email(email_id, payload)
+            contents = self.server.retr(email_id)[1]
+            email = Email(email_id, contents)
             yield email
 
     def delete(self, email: Email) -> None:

@@ -24,4 +24,7 @@ def run(
 
 
 if __name__ == "__main__":
-    app()
+    try:
+        app()
+    except Exception as err:
+        logger.exception(err)

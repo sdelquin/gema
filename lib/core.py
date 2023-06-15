@@ -12,9 +12,10 @@ from .utils import decode_content, parse_date, pluralize
 
 
 class Email:
-    def __init__(self, id: int, contents: list[bytes]):
+    def __init__(self, id: int, contents: list[bytes], include_inbox=settings.INCLUDE_INBOX):
         logger.debug(f'Building email with id #{id}')
         self.id = id
+        self.include_inbox = include_inbox
         self.parse_contents(contents)
 
     def parse_contents(self, contents: list[bytes]) -> None:
@@ -53,10 +54,12 @@ class Email:
         return f'📥 {self.subject} ({self.from_email})'
 
     def as_markdown(self) -> str:
-        return f'''*From*: {self.from_}
+        md = f'''*From*: {self.from_}
 *Subject*: {self.subject}
-*Date*: {self.date.strftime('%c')}
-*Inbox*: {self.inbox}'''
+*Date*: {self.date.strftime('%c')}'''
+        if self.include_inbox:
+            md += f'\n*Inbox*: {self.inbox}'
+        return md
 
 
 class Pop3Server:

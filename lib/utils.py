@@ -35,7 +35,7 @@ def init_logger():
 def decode_content(content: str) -> str:
     CHEADER = '=?UTF-8?Q?'
     CFOOTER = '?='
-    cleaned_content = re.sub('\n', '', content)
+    cleaned_content = re.sub('=?\n', '', content)
     cleaned_content = re.sub(r'={2,}', '=', cleaned_content)
     payload = f'{CHEADER}{cleaned_content}{CFOOTER}'
     text, encoding = email.header.decode_header(payload)[0]

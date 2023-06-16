@@ -1,9 +1,11 @@
 import email.header
 import re
 from datetime import datetime
+from email import message_from_bytes
 
 import logzero
 import pytz
+from logzero import logger
 
 import settings
 
@@ -40,6 +42,44 @@ def decode_content(content: str) -> str:
     payload = f'{CHEADER}{cleaned_content}{CFOOTER}'
     text, encoding = email.header.decode_header(payload)[0]
     return text.decode(encoding)
+
+
+def parse_email_contents(contents: list[bytes]) -> tuple[str | datetime | None, ...]:
+    logger.debug('Parsing email contents')
+    message = message_from_bytes(b'\n'.join(contents))
+    payload = message.get_payload()
+    logger.debug(payload)
+
+    # INBOX
+    if m := re.search(r'New message received at *(.*)\.', payload):
+        inbox = decode_content(m[1])
+    else:
+        inbox = settings.UNPARSED_PLACEHOLDER
+        logger.warning('Inbox could not be parsed')
+    # FROM
+    if m := re.search(r'Sender: *(.*) <(.*)>', payload):
+        from_name = decode_content(m[1])
+        from_email = m[2]
+    elif m := re.search(r'Sender: *(.*)', payload):
+        from_name = None
+        from_email = m[1]
+    else:
+        from_name = from_email = settings.UNPARSED_PLACEHOLDER
+        logger.warning('From could not be parsed')
+    # SUBJECT
+    if m := re.search(r'Subject: *(.*)', payload, re.DOTALL | re.MULTILINE):
+        subject = decode_content(m[1])
+    else:
+        subject = settings.UNPARSED_PLACEHOLDER
+        logger.warning('Subject could not be parsed')
+    # DATE
+    if m := re.search(r'.*\+\d+', message['Date']):
+        date = parse_date(m[0])
+    else:
+        date = settings.UNPARSED_PLACEHOLDER
+        logger.warning('Date could not be parsed')
+
+    return inbox, from_name, from_email, subject, date
 
 
 def pluralize(text: str, n: int) -> str:

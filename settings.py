@@ -20,3 +20,4 @@ LOGFILE_BACKUP_COUNT = config('LOGFILE_BACKUP_COUNT', cast=int, default=3)
 TIMEZONE = config('TIMEZONE', default='Atlantic/Canary')
 
 INCLUDE_INBOX = config('INCLUDE_INBOX', default=False, cast=config.boolean)
+UNPARSED_PLACEHOLDER = config('UNPARSED_PLACEHOLDER', default='?')

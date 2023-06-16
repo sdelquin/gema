@@ -1,6 +1,4 @@
 import poplib
-import re
-from email import message_from_bytes
 from typing import Iterator
 
 import telegram
@@ -8,7 +6,7 @@ from logzero import logger
 
 import settings
 
-from .utils import decode_content, parse_date, pluralize
+from .utils import parse_email_contents, pluralize
 
 
 class Email:
@@ -16,39 +14,16 @@ class Email:
         logger.debug(f'Building email with id #{id}')
         self.id = id
         self.include_inbox = include_inbox
-        self.parse_contents(contents)
-
-    def parse_contents(self, contents: list[bytes]) -> None:
-        logger.debug('Parsing payload')
-        message = message_from_bytes(b'\n'.join(contents))
-        payload = message.get_payload()
-        logger.debug(payload)
-        if m := re.search(r'^New message received at *(.*)\.', payload):
-            self.inbox = decode_content(m[1])
-        else:
-            self.inbox = None
-            logger.warning('Inbox could not be parsed')
-        if m := re.search(r'Sender: *(.*) <(.*)>', payload):
-            self.from_name = decode_content(m[1])
-            self.from_email = m[2]
-        else:
-            self.from_name = None
-            self.from_email = None
-            logger.warning('From could not be parsed')
-        if m := re.search(r'Subject: *(.*)', payload, re.DOTALL | re.MULTILINE):
-            self.subject = decode_content(m[1])
-        else:
-            self.subject = None
-            logger.warning('Subject could not be parsed')
-        if m := re.search(r'.*\+\d+', message['Date']):
-            self.date = parse_date(m[0])
-        else:
-            self.date = None
-            logger.warning('Date could not be parsed')
+        self.inbox, self.from_name, self.from_email, self.subject, self.date = parse_email_contents(
+            contents
+        )
 
     @property
     def from_(self) -> str:
-        return f'{self.from_name} <{self.from_email}>'
+        if self.from_name is None:
+            return self.from_email
+        else:
+            return f'{self.from_name} <{self.from_email}>'
 
     def __str__(self):
         return f'📥 {self.subject} ({self.from_email})'

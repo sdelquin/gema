@@ -1,6 +1,6 @@
 *.pyc
 .python-version
 .env
-*.log
+*.log*
 .artwork
 .DS_Store

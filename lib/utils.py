@@ -57,13 +57,13 @@ def parse_email_contents(contents: list[bytes]) -> tuple[str | datetime | None, 
         inbox = settings.UNPARSED_PLACEHOLDER
         logger.warning('Inbox could not be parsed')
     # FROM
-    if m := re.search(r'Sender: *(.*) <(.*)>', payload):
+    if m := re.search(r'Sender: (.*) <(.*)>', payload):
         from_name = decode_content(m[1])
         from_email = m[2]
-    elif m := re.search(r'Sender: *<(.*)>', payload):
+    elif m := re.search(r'Sender: <(.*)>', payload):
         from_name = None
         from_email = m[1]
-    elif m := re.search(r'Sender: *(.*)', payload):
+    elif m := re.search(r'Sender: (.*)', payload):
         from_name = None
         from_email = m[1]
     else:

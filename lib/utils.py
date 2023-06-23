@@ -37,8 +37,7 @@ def init_logger():
 def decode_content(content: str) -> str:
     CHEADER = '=?UTF-8?Q?'
     CFOOTER = '?='
-    cleaned_content = re.sub(r'=?\n', '', content)
-    cleaned_content = re.sub(r'={2,}', '=', cleaned_content)
+    cleaned_content = re.sub(r'={2,}', '=', content)
     payload = f'{CHEADER}{cleaned_content}{CFOOTER}'
     text, encoding = email.header.decode_header(payload)[0]
     return text.decode(encoding)
@@ -49,6 +48,8 @@ def parse_email_contents(contents: list[bytes]) -> tuple[str | datetime | None, 
     message = message_from_bytes(b'\n'.join(contents))
     payload = message.get_payload()
     logger.debug(payload)
+
+    payload = re.sub(r'=?\n', '', payload)
 
     # INBOX
     if m := re.search(r'New message received at *(.*)\.', payload):
@@ -70,7 +71,7 @@ def parse_email_contents(contents: list[bytes]) -> tuple[str | datetime | None, 
         from_name = from_email = settings.UNPARSED_PLACEHOLDER
         logger.warning('From could not be parsed')
     # SUBJECT
-    if m := re.search(r'Subject: *(.*)', payload, re.DOTALL | re.MULTILINE):
+    if m := re.search(r'Subject: (.*)', payload):
         subject = decode_content(m[1])
     else:
         subject = settings.UNPARSED_PLACEHOLDER

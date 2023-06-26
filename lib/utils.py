@@ -52,7 +52,7 @@ def parse_email_contents(contents: list[bytes]) -> tuple[str | datetime | None, 
     payload = re.sub(r'=?\n', '', payload)
 
     # INBOX
-    if m := re.search(r'New message received at *(.*)\.', payload):
+    if m := re.search(r'New message received at *(\S+)\.', payload):
         inbox = decode_content(m[1])
     else:
         inbox = settings.UNPARSED_PLACEHOLDER

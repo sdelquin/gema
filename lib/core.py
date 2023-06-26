@@ -105,4 +105,4 @@ class GobCanEmailAlarm:
                     if self.delete:
                         self.server.delete(email)
             else:
-                logger.warning(f'Email inbox "{inbox}" is not set in settings')
+                logger.warning(f'Email inbox "{email.inbox}" is not set in settings')

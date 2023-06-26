@@ -21,3 +21,5 @@ TIMEZONE = config('TIMEZONE', default='Atlantic/Canary')
 
 INCLUDE_INBOX = config('INCLUDE_INBOX', default=False, cast=config.boolean)
 UNPARSED_PLACEHOLDER = config('UNPARSED_PLACEHOLDER', default='?')
+
+EMAIL_REGEX = r'\b[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,4}\b'

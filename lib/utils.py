@@ -46,9 +46,9 @@ def decode_content(content: str) -> str:
 def parse_email_contents(contents: list[bytes]) -> tuple[str | datetime | None, ...]:
     logger.debug('Parsing email contents')
     message = message_from_bytes(b'\n'.join(contents))
-    payload = message.get_payload()
+    if isinstance(payload := message.get_payload(), list):
+        raise ValueError("Email contents don't have expected structure!")
     logger.debug(payload)
-
     payload = re.sub(r'=?\n', '', payload)
 
     # INBOX

@@ -49,7 +49,7 @@ class Pop3Server:
         self.server.user(username)
         self.server.pass_(password)
 
-    def fetch(self) -> Iterator[Email]:
+    def fetch(self) -> Iterator[Email | None]:
         logger.info('👀 Fetching new emails')
         num_emails = len(self.server.list()[1])
         flag = '✨' if num_emails > 0 else '👎'
@@ -57,8 +57,13 @@ class Pop3Server:
         for email_id in range(1, num_emails + 1):
             logger.debug(f'Retrieving content #{email_id} from server')
             contents = self.server.retr(email_id)[1]
-            email = Email(email_id, contents)
-            yield email
+            try:
+                email = Email(email_id, contents)
+            except ValueError as err:
+                logger.error(f'🚨 {err}')
+                yield None
+            else:
+                yield email
 
     def delete(self, email: Email) -> None:
         logger.debug(f'✗ Deleting email #{email.id} from pop3 server')
@@ -94,15 +99,18 @@ class GobCanEmailAlarm:
     def dispatch(self, inbox: str = settings.INBOX, telegram_chat_id=settings.TELEGRAM_CHAT_ID):
         logger.info(f'👤 Dispatching inbox {inbox}')
         for email in self.server.fetch():
-            if inbox is None or email.inbox == inbox:
-                try:
-                    logger.info(email)
-                    if self.notify:
-                        self.tgbot.send(telegram_chat_id, email.as_markdown())
-                except Exception as err:
-                    logger.error(err)
-                else:
-                    if self.delete:
-                        self.server.delete(email)
-            else:
+            if email is None:
+                logger.warning('Skipping this email')
+                continue
+            if email.inbox != inbox:
                 logger.warning(f'Email inbox "{email.inbox}" is not set in settings')
+                continue
+            try:
+                logger.info(email)
+                if self.notify:
+                    self.tgbot.send(telegram_chat_id, email.as_markdown())
+            except Exception as err:
+                logger.error(err)
+            else:
+                if self.delete:
+                    self.server.delete(email)

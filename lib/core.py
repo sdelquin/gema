@@ -102,7 +102,7 @@ class GobCanEmailAlarm:
             if email is None:
                 logger.warning('Skipping this email')
                 continue
-            if email.inbox != inbox:
+            if inbox and email.inbox != inbox:
                 logger.warning(f'Email inbox "{email.inbox}" is not set in settings')
                 continue
             try:

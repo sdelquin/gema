@@ -3,6 +3,7 @@ from typing import Iterator
 
 import telegram
 from logzero import logger
+from telegram.utils.helpers import escape_markdown
 
 import settings
 
@@ -29,9 +30,9 @@ class Email:
         return f'📥 {self.subject} ({self.from_email})'
 
     def as_markdown(self) -> str:
-        md = f'''*From*: {self.from_}
-*Subject*: {self.subject}
-*Date*: {self.date.strftime('%c')}'''
+        md = f"""*From*: {self.from_}
+*Subject*: {escape_markdown(self.subject)}
+*Date*: {self.date.strftime('%c')}"""
         if self.include_inbox:
             md += f'\n*Inbox*: {self.inbox}'
         return md

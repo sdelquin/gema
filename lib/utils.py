@@ -43,7 +43,7 @@ def decode_content(content: str) -> str:
     return text.decode(encoding)
 
 
-def parse_email_contents(contents: list[bytes]) -> tuple[str | datetime | None, ...]:
+def parse_email_contents(contents: list[bytes]) -> tuple:
     logger.debug('Parsing email contents')
     message = message_from_bytes(b'\n'.join(contents))
     if isinstance(payload := message.get_payload(), list):

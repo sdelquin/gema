@@ -1,6 +1,5 @@
 prettyconf
 telegramtk
-python-telegram-bot
 logzero
 typer
 pytz

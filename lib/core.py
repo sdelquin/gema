@@ -1,10 +1,9 @@
 import poplib
-from functools import partial
 from typing import Iterator
 
 import telegramtk
 from logzero import logger
-from telegram.helpers import escape_markdown
+from telegramtk.utils import escape_markdown
 
 import settings
 
@@ -19,8 +18,6 @@ class Email:
         self.inbox, self.from_name, self.from_email, self.subject, self.date = parse_email_contents(
             contents
         )
-        # https://docs.python-telegram-bot.org/en/stable/telegram.helpers.html#telegram.helpers.escape_markdown
-        self.escape_markdown = partial(escape_markdown, version=2)
 
     @property
     def from_(self) -> str:
@@ -33,8 +30,8 @@ class Email:
         return f'📥 {self.subject} ({self.from_email})'
 
     def as_markdown(self) -> str:
-        md = f"""*From*: {self.escape_markdown(self.from_)}
-*Subject*: {self.escape_markdown(self.subject)}
+        md = f"""*From*: {escape_markdown(self.from_)}
+*Subject*: {escape_markdown(self.subject)}
 *Date*: {self.date.strftime('%c')}"""
         if self.include_inbox:
             md += f'\n*Inbox*: {self.inbox}'

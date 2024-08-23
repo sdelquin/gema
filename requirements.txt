@@ -1,4 +1,6 @@
 prettyconf
-python-telegram-bot==13.15
+telegramtk
+python-telegram-bot
 logzero
 typer
+pytz

@@ -1,9 +1,10 @@
 import poplib
+from functools import partial
 from typing import Iterator
 
-import telegram
+import telegramtk
 from logzero import logger
-from telegram.utils.helpers import escape_markdown
+from telegram.helpers import escape_markdown
 
 import settings
 
@@ -18,6 +19,8 @@ class Email:
         self.inbox, self.from_name, self.from_email, self.subject, self.date = parse_email_contents(
             contents
         )
+        # https://docs.python-telegram-bot.org/en/stable/telegram.helpers.html#telegram.helpers.escape_markdown
+        self.escape_markdown = partial(escape_markdown, version=2)
 
     @property
     def from_(self) -> str:
@@ -30,8 +33,8 @@ class Email:
         return f'📥 {self.subject} ({self.from_email})'
 
     def as_markdown(self) -> str:
-        md = f"""*From*: {self.from_}
-*Subject*: {escape_markdown(self.subject)}
+        md = f"""*From*: {self.escape_markdown(self.from_)}
+*Subject*: {self.escape_markdown(self.subject)}
 *Date*: {self.date.strftime('%c')}"""
         if self.include_inbox:
             md += f'\n*Inbox*: {self.inbox}'
@@ -75,20 +78,9 @@ class Pop3Server:
         self.server.quit()
 
 
-class TelegramBot:
-    def __init__(self, token: str = settings.TELEGRAM_BOT_TOKEN):
-        logger.debug('Building Telegram Bot')
-        self.bot = telegram.Bot(token)
-
-    def send(self, chat_id: str, text: str):
-        logger.debug(f'Sending message to chat id {chat_id} through Telegram Bot')
-        self.bot.send_message(chat_id=chat_id, text=text, parse_mode=telegram.ParseMode.MARKDOWN)
-
-
 class GobCanEmailAlarm:
     def __init__(self, notify: bool = True, delete: bool = True):
         self.server = Pop3Server()
-        self.tgbot = TelegramBot()
         self.notify = notify
         self.delete = delete
 
@@ -109,7 +101,7 @@ class GobCanEmailAlarm:
             try:
                 logger.info(email)
                 if self.notify:
-                    self.tgbot.send(telegram_chat_id, email.as_markdown())
+                    telegramtk.send_message(telegram_chat_id, email.as_markdown())
             except Exception as err:
                 logger.error(err)
             else:

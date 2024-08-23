@@ -1,12 +1,15 @@
 from pathlib import Path
 
+import telegramtk
 from prettyconf import config
 
 PROJECT_DIR = Path(__file__).parent
 PROJECT_NAME = PROJECT_DIR.name
 
 TELEGRAM_BOT_TOKEN = config('TELEGRAM_BOT_TOKEN')
+telegramtk.init(TELEGRAM_BOT_TOKEN)
 TELEGRAM_CHAT_ID = config('TELEGRAM_CHAT_ID')
+
 
 INBOX = config('INBOX', default=None)
 POP3_SERVER = config('POP3_SERVER')

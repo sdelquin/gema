@@ -1,5 +1,5 @@
 #!/bin/bash
 
-source ~/.pyenv/versions/gema/bin/activate
 cd "$(dirname "$0")"
+source .venv/bin/activate
 python main.py

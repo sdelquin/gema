@@ -1,0 +1,15 @@
+[project]
+name = "gema"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = [
+    "logzero>=1.7.0",
+    "prettyconf>=2.3.0",
+    "pytz>=2025.2",
+    "telegramtk>=0.1.0",
+    "typer>=0.15.4",
+]
+
+[dependency-groups]
+dev = ["ipython>=9.2.0", "pytest>=8.3.5"]
+prod = []

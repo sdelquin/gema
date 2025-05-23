@@ -1,5 +1,0 @@
-prettyconf
-telegramtk
-logzero
-typer
-pytz

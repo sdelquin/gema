@@ -11,7 +11,6 @@ telegramtk.init(TELEGRAM_BOT_TOKEN)
 TELEGRAM_CHAT_ID = config('TELEGRAM_CHAT_ID')
 
 
-INBOX = config('INBOX', default=None)
 POP3_SERVER = config('POP3_SERVER')
 POP3_USERNAME = config('POP3_USERNAME')
 POP3_PASSWORD = config('POP3_PASSWORD')

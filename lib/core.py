@@ -11,30 +11,18 @@ from .utils import parse_email_contents, pluralize
 
 
 class Email:
-    def __init__(self, id: int, contents: list[bytes], include_inbox=settings.INCLUDE_INBOX):
+    def __init__(self, id: int, contents: list[bytes]):
         logger.debug(f'Building email with id #{id}')
         self.id = id
-        self.include_inbox = include_inbox
-        self.inbox, self.from_name, self.from_email, self.subject, self.date = parse_email_contents(
-            contents
-        )
-
-    @property
-    def from_(self) -> str:
-        if self.from_name is None:
-            return self.from_email
-        else:
-            return f'{self.from_name} <{self.from_email}>'
+        self.from_, self.subject, self.date = parse_email_contents(contents)
 
     def __str__(self):
-        return f'📥 {self.subject} ({self.from_email})'
+        return f'📥 {self.subject} ({self.from_})'
 
     def as_markdown(self) -> str:
         md = f"""*From*: {escape_markdown(self.from_)}
 *Subject*: {escape_markdown(self.subject)}
 *Date*: {self.date.strftime('%c')}"""
-        if self.include_inbox:
-            md += f'\n*Inbox*: {self.inbox}'
         return md
 
 
@@ -86,14 +74,11 @@ class GobCanEmailAlarm:
         if not self.delete:
             logger.warning('Disabled email deletion after dispatching')
 
-    def dispatch(self, inbox: str = settings.INBOX, telegram_chat_id=settings.TELEGRAM_CHAT_ID):
-        logger.info(f'👤 Dispatching inbox {inbox}')
+    def dispatch(self, telegram_chat_id=settings.TELEGRAM_CHAT_ID):
+        logger.info('👤 Dispatching ')
         for email in self.server.fetch():
             if email is None:
                 logger.warning('Skipping this email')
-                continue
-            if inbox and email.inbox != inbox:
-                logger.warning(f'Email inbox "{email.inbox}" is not set in settings')
                 continue
             try:
                 logger.info(email)

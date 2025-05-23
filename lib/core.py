@@ -17,7 +17,7 @@ class GobCanEmailAlarm:
             logger.warning('Disabled email deletion after dispatching')
 
     def dispatch(self, telegram_chat_id=settings.TELEGRAM_CHAT_ID):
-        logger.info('👤 Dispatching ')
+        logger.info('👤 Dispatching emails')
         for email in self.server.fetch():
             if email is None:
                 logger.warning('Skipping this email')
